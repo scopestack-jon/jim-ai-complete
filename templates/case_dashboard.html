@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JIM AI - Professional Case Management</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .sidebar {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            height: fit-content;
+        }
+
+        .content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .btn-success:hover {
+            background: #229954;
+        }
+
+        .case-list {
+            list-style: none;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .case-item {
+            padding: 12px;
+            margin: 5px 0;
+            background: #f8f9fa;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+        .case-item:hover {
+            background: #e9ecef;
+            border-left-color: #3498db;
+        }
+
+        .case-item.active {
+            background: #3498db;
+            color: white;
+            border-left-color: #2980b9;
+        }
+
+        .case-item-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .case-item-meta {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+
+        .folder-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .folder-card {
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .folder-card:hover {
+            background: #e9ecef;
+            border-color: #3498db;
+            transform: translateY(-2px);
+        }
+
+        .folder-card.active {
+            background: #3498db;
+            color: white;
+        }
+
+        .folder-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .folder-name {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .folder-count {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-top: 4px;
+        }
+
+        .upload-area {
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            margin: 20px 0;
+            background: #fafbfc;
+            transition: all 0.2s;
+        }
+
+        .upload-area:hover {
+            border-color: #3498db;
+            background: #f0f8ff;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .recent-files {
+            margin-top: 30px;
+        }
+
+        .file-list {
+            list-style: none;
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .file-item:hover {
+            background: #f8f9fa;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .file-meta {
+            font-size: 12px;
+            color: #7f8c8d;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .alert {
+            padding: 12px;
+            border-radius: 6px;
+            margin: 10px 0;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border-left: 3px solid #0c5460;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border-left: 3px solid #155724;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left: 3px solid #721c24;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(0,0,0,0.1);
+            border-radius: 50%;
+            border-top-color: #3498db;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <h1>⚖️ JIM AI - Professional Case Management System</h1>
+            <p style="opacity: 0.9; margin-top: 5px;">Secure forensic evidence management with individual case isolation</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="main-grid">
+            <div class="sidebar">
+                <h3 style="margin-bottom: 15px;">📁 My Cases</h3>
+                <button class="btn btn-success" onclick="openNewCaseModal()">
+                    + Create New Case
+                </button>
+                <ul class="case-list" id="caseList">
+                    <!-- Cases will be loaded here -->
+                </ul>
+            </div>
+
+            <div class="content">
+                <div id="welcomeView" style="text-align: center; padding: 60px 0;">
+                    <h2>Welcome to JIM AI</h2>
+                    <p style="color: #7f8c8d; margin-top: 10px;">Select a case from the sidebar or create a new one to get started</p>
+                </div>
+
+                <div id="caseView" style="display: none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h2 id="caseTitle">Case Details</h2>
+                            <p id="caseClient" style="color: #7f8c8d; margin-top: 5px;"></p>
+                        </div>
+                        <div style="text-align: right;">
+                            <div id="caseTimezone" style="font-size: 14px; color: #7f8c8d;"></div>
+                            <div id="caseCreated" style="font-size: 12px; color: #95a5a6; margin-top: 5px;"></div>
+                        </div>
+                    </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalFiles">0</div>
+                            <div class="stat-label">Total Files</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalSize">0 MB</div>
+                            <div class="stat-label">Total Size</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="totalCategories">0</div>
+                            <div class="stat-label">Categories</div>
+                        </div>
+                    </div>
+
+                    <h3 style="margin-top: 30px;">📂 Evidence Categories</h3>
+                    <div class="folder-grid" id="folderGrid">
+                        <div class="folder-card" onclick="selectCategory('Documents/Legal')">
+                            <div class="folder-icon">📄</div>
+                            <div class="folder-name">Legal Documents</div>
+                            <div class="folder-count">0 files</div>
+                        </div>
+                        <div class="folder-card" onclick="selectCategory('Documents/Reports')">
+                            <div class="folder-icon">📊</div>
+                            <div class="folder-name">Reports</div>
+                            <div class="folder-count">0 files</div>
+                        </div>
+                        <div class="folder-card" onclick="selectCategory('Phone-Extractions/iOS')">
+                            <div class="folder-icon">📱</div>
+                            <div class="folder-name">iOS Phones</div>
+                            <div class="folder-count">0 files</div>
+                        </div>
+                        <div class="folder-card" onclick="selectCategory('Phone-Extractions/Android')">
+                            <div class="folder-icon">📱</div>
+                            <div class="folder-name">Android Phones</div>
+                            <div class="folder-count">0 files</div>
+                        </div>
+                        <div class="folder-card" onclick="selectCategory('Digital-Evidence/Computers')">
+                            <div class="folder-icon">💻</div>
+                            <div class="folder-name">Computers</div>
+                            <div class="folder-count">0 files</div>
+                        </div>
+                        <div class="folder-card" onclick="selectCategory('Digital-Evidence/Cloud')">
+                            <div class="folder-icon">☁️</div>
+                            <div class="folder-name">Cloud Data</div>
+                            <div class="folder-count">0 files</div>
+                        </div>
+                        <div class="folder-card" onclick="selectCategory('Multimedia/Photos')">
+                            <div class="folder-icon">📷</div>
+                            <div class="folder-name">Photos</div>
+                            <div class="folder-count">0 files</div>
+                        </div>
+                        <div class="folder-card" onclick="selectCategory('Multimedia/Videos')">
+                            <div class="folder-icon">🎥</div>
+                            <div class="folder-name">Videos</div>
+                            <div class="folder-count">0 files</div>
+                        </div>
+                    </div>
+
+                    <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                        <input type="file" id="fileInput" multiple style="display: none;">
+                        <h3>📤 Drop files here or click to upload</h3>
+                        <p style="color: #7f8c8d; margin-top: 10px;">Files will be uploaded to: <strong id="uploadPath">Select a category</strong></p>
+                    </div>
+
+                    <div style="margin-top: 30px;">
+                        <h3>🔍 Search This Case</h3>
+                        <p style="font-size: 14px; color: #7f8c8d; margin: 10px 0;">
+                            AI-powered search with automatic timezone conversion for phone data
+                        </p>
+                        <input type="text" class="search-box" id="searchBox"
+                               placeholder="Ask questions about the evidence (e.g., 'What calls were made on March 15 at 3pm local time?')">
+                        <button class="btn btn-primary" onclick="searchCase()">Search with AI</button>
+
+                        <div id="searchResults" style="display: none; margin-top: 20px;"></div>
+                    </div>
+
+                    <div class="recent-files">
+                        <h3>📋 Recent Uploads</h3>
+                        <ul class="file-list" id="recentFiles">
+                            <!-- Recent files will be loaded here -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Case Modal -->
+    <div id="newCaseModal" class="modal">
+        <div class="modal-content">
+            <h2>Create New Case</h2>
+            <div class="form-group">
+                <label for="caseNumber">Case Number *</label>
+                <input type="text" id="caseNumber" placeholder="e.g., 2024-CR-001">
+            </div>
+            <div class="form-group">
+                <label for="clientName">Client Name *</label>
+                <input type="text" id="clientName" placeholder="e.g., John Doe">
+            </div>
+            <div class="form-group">
+                <label for="attorneyName">Attorney Name</label>
+                <input type="text" id="attorneyName" placeholder="Your name">
+            </div>
+            <div class="form-group">
+                <label for="timezone">Case Timezone *</label>
+                <select id="timezone">
+                    <option value="">Select timezone...</option>
+                    <option value="US/Eastern">Eastern Time (ET)</option>
+                    <option value="US/Central">Central Time (CT)</option>
+                    <option value="US/Mountain">Mountain Time (MT)</option>
+                    <option value="US/Pacific">Pacific Time (PT)</option>
+                    <option value="US/Alaska">Alaska Time (AKT)</option>
+                    <option value="US/Hawaii">Hawaii Time (HT)</option>
+                    <option value="Europe/London">London (GMT)</option>
+                    <option value="Europe/Paris">Paris (CET)</option>
+                    <option value="Asia/Tokyo">Tokyo (JST)</option>
+                    <option value="Australia/Sydney">Sydney (AEDT)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="description">Case Description</label>
+                <textarea id="description" placeholder="Brief description of the case..."></textarea>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="closeNewCaseModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="createNewCase()">Create Case</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentCase = null;
+        let currentCategory = null;
+
+        // Load cases on startup
+        loadCases();
+
+        async function loadCases() {
+            try {
+                const response = await fetch('/api/cases');
+                const cases = await response.json();
+
+                const caseList = document.getElementById('caseList');
+                if (cases.length === 0) {
+                    caseList.innerHTML = '<li style="padding: 20px; text-align: center; color: #7f8c8d;">No cases yet</li>';
+                } else {
+                    caseList.innerHTML = cases.map(c => `
+                        <li class="case-item" onclick="selectCase('${c.case_number}')">
+                            <div class="case-item-title">${c.case_number}</div>
+                            <div class="case-item-meta">${c.client_name} • ${c.timezone}</div>
+                        </li>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading cases:', error);
+            }
+        }
+
+        async function selectCase(caseNumber) {
+            currentCase = caseNumber;
+
+            // Update UI
+            document.querySelectorAll('.case-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.querySelector('.case-item-title').textContent === caseNumber) {
+                    item.classList.add('active');
+                }
+            });
+
+            // Show case view
+            document.getElementById('welcomeView').style.display = 'none';
+            document.getElementById('caseView').style.display = 'block';
+
+            // Load case details
+            try {
+                const response = await fetch(`/api/case/${caseNumber}`);
+                const caseData = await response.json();
+
+                // Update case info
+                document.getElementById('caseTitle').textContent = caseData.case_number;
+                document.getElementById('caseClient').textContent = `Client: ${caseData.client_name}`;
+                document.getElementById('caseTimezone').textContent = `Timezone: ${caseData.timezone}`;
+                document.getElementById('caseCreated').textContent = `Created: ${new Date(caseData.created_date).toLocaleDateString()}`;
+
+                // Update statistics
+                document.getElementById('totalFiles').textContent = caseData.total_files || 0;
+                const sizeMB = ((caseData.total_size || 0) / 1048576).toFixed(1);
+                document.getElementById('totalSize').textContent = `${sizeMB} MB`;
+                document.getElementById('totalCategories').textContent = Object.keys(caseData.file_statistics || {}).length;
+
+                // Update folder counts
+                const stats = caseData.file_statistics || {};
+                updateFolderCounts(stats);
+
+                // Load recent files
+                const recentList = document.getElementById('recentFiles');
+                if (caseData.recent_files && caseData.recent_files.length > 0) {
+                    recentList.innerHTML = caseData.recent_files.map(f => `
+                        <li class="file-item">
+                            <div class="file-info">
+                                <span>📄</span>
+                                <div>
+                                    <div>${f.name}</div>
+                                    <div class="file-meta">${f.category} • ${(f.size / 1024).toFixed(1)} KB</div>
+                                </div>
+                            </div>
+                            <div class="file-meta">${new Date(f.upload_date).toLocaleDateString()}</div>
+                        </li>
+                    `).join('');
+                } else {
+                    recentList.innerHTML = '<li style="padding: 20px; text-align: center; color: #7f8c8d;">No files uploaded yet</li>';
+                }
+
+            } catch (error) {
+                console.error('Error loading case details:', error);
+            }
+        }
+
+        function selectCategory(category) {
+            currentCategory = category;
+
+            // Update active folder
+            document.querySelectorAll('.folder-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+
+            // Update upload path
+            document.getElementById('uploadPath').textContent = `${currentCase}/${category}`;
+        }
+
+        function updateFolderCounts(stats) {
+            // Map categories to folder cards
+            const categoryMap = {
+                'Documents/Legal': 'Legal Documents',
+                'Documents/Reports': 'Reports',
+                'Phone-Extractions/iOS': 'iOS Phones',
+                'Phone-Extractions/Android': 'Android Phones',
+                'Digital-Evidence/Computers': 'Computers',
+                'Digital-Evidence/Cloud': 'Cloud Data',
+                'Multimedia/Photos': 'Photos',
+                'Multimedia/Videos': 'Videos'
+            };
+
+            document.querySelectorAll('.folder-card').forEach(card => {
+                const folderName = card.querySelector('.folder-name').textContent;
+                const countElement = card.querySelector('.folder-count');
+
+                // Find matching category
+                for (const [cat, name] of Object.entries(categoryMap)) {
+                    if (name === folderName) {
+                        const count = stats[cat]?.count || 0;
+                        countElement.textContent = `${count} files`;
+                        break;
+                    }
+                }
+            });
+        }
+
+        function openNewCaseModal() {
+            document.getElementById('newCaseModal').style.display = 'flex';
+        }
+
+        function closeNewCaseModal() {
+            document.getElementById('newCaseModal').style.display = 'none';
+        }
+
+        async function createNewCase() {
+            const caseData = {
+                case_number: document.getElementById('caseNumber').value,
+                client_name: document.getElementById('clientName').value,
+                attorney_name: document.getElementById('attorneyName').value,
+                timezone: document.getElementById('timezone').value,
+                description: document.getElementById('description').value
+            };
+
+            // Validation
+            if (!caseData.case_number || !caseData.client_name || !caseData.timezone) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/case', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(caseData)
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    alert(`Case ${caseData.case_number} created successfully!`);
+                    closeNewCaseModal();
+                    loadCases();
+                    selectCase(caseData.case_number);
+                } else {
+                    alert(`Error creating case: ${result.error}`);
+                }
+            } catch (error) {
+                alert(`Error: ${error.message}`);
+            }
+        }
+
+        // File upload
+        document.getElementById('fileInput').addEventListener('change', async (e) => {
+            if (!currentCase || !currentCategory) {
+                alert('Please select a case and category first');
+                return;
+            }
+
+            const files = e.target.files;
+            if (!files.length) return;
+
+            const formData = new FormData();
+            formData.append('case_number', currentCase);
+            formData.append('category', currentCategory);
+
+            for (let file of files) {
+                formData.append('files', file);
+            }
+
+            try {
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                alert(`Uploaded ${files.length} files to ${currentCase}/${currentCategory}`);
+                selectCase(currentCase); // Reload case to update stats
+            } catch (error) {
+                alert(`Upload error: ${error.message}`);
+            }
+        });
+
+        async function searchCase() {
+            const query = document.getElementById('searchBox').value;
+            if (!query || !currentCase) return;
+
+            const resultsDiv = document.getElementById('searchResults');
+            resultsDiv.style.display = 'block';
+            resultsDiv.innerHTML = '<div class="alert alert-info">🔍 Searching with AI...</div>';
+
+            try {
+                const response = await fetch('/api/search', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        case_number: currentCase,
+                        query: query
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.error) {
+                    resultsDiv.innerHTML = `<div class="alert alert-error">Error: ${result.error}</div>`;
+                } else {
+                    resultsDiv.innerHTML = `
+                        <div class="alert alert-success">
+                            <h4>AI Analysis Result:</h4>
+                            <p style="margin-top: 10px; white-space: pre-wrap;">${result.answer}</p>
+                            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(0,0,0,0.1);">
+                                <small>
+                                    Searched ${result.files_available} files in ${result.case_number}<br>
+                                    Timezone: ${result.timezone} (UTC timestamps automatically converted)
+                                </small>
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="alert alert-error">Error: ${error.message}</div>`;
+            }
+        }
+
+        // Handle modal clicks
+        window.onclick = function(event) {
+            if (event.target.className === 'modal') {
+                event.target.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JIM AI - Simple Evidence Management</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+        }
+
+        .sidebar {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .content {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .case-list {
+            list-style: none;
+        }
+
+        .case-item {
+            padding: 10px;
+            margin: 5px 0;
+            background: #f8f9fa;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .case-item:hover {
+            background: #e9ecef;
+        }
+
+        .case-item.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .upload-area {
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .category-select {
+            display: inline-block;
+            margin: 10px;
+        }
+
+        .file-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .file-card {
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .file-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: opacity 0.2s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-success {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        .category-folders {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .folder {
+            padding: 15px 25px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .folder:hover {
+            background: #e9ecef;
+        }
+
+        .folder.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .results {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 JIM AI - Simple Evidence Management</h1>
+            <p>Organize and search forensic evidence by case - No complex setup required!</p>
+        </div>
+
+        <div class="main-grid">
+            <div class="sidebar">
+                <h3>📁 Cases</h3>
+                <button class="btn btn-success" onclick="createNewCase()" style="width: 100%; margin: 10px 0;">
+                    + New Case
+                </button>
+                <ul class="case-list" id="caseList">
+                    <li class="case-item active" onclick="selectCase('Case-001')">Case-001</li>
+                </ul>
+            </div>
+
+            <div class="content">
+                <h2 id="caseTitle">Case-001</h2>
+
+                <div class="category-folders">
+                    <div class="folder active" onclick="selectCategory('Documents')">
+                        📄 Documents
+                    </div>
+                    <div class="folder" onclick="selectCategory('Phone-Extractions')">
+                        📱 Phone Extractions
+                    </div>
+                    <div class="folder" onclick="selectCategory('Photos')">
+                        📷 Photos
+                    </div>
+                    <div class="folder" onclick="selectCategory('Videos')">
+                        🎥 Videos
+                    </div>
+                    <div class="folder" onclick="selectCategory('Audio')">
+                        🎵 Audio
+                    </div>
+                    <div class="folder" onclick="selectCategory('Reports')">
+                        📊 Reports
+                    </div>
+                </div>
+
+                <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                    <input type="file" id="fileInput" multiple style="display: none;">
+                    <h3>📎 Drop files here or click to upload</h3>
+                    <p>Files will be uploaded to: <strong id="uploadPath">Case-001/Documents</strong></p>
+                </div>
+
+                <div>
+                    <h3>🔍 Search This Case</h3>
+                    <input type="text" class="search-box" id="searchBox"
+                           placeholder="Ask questions about the evidence (e.g., 'What phone calls were made on March 15?')"
+                           onkeypress="if(event.key==='Enter') searchCase()">
+                    <button class="btn btn-primary" onclick="searchCase()">Search with AI</button>
+                </div>
+
+                <div id="searchResults" class="results" style="display: none;"></div>
+
+                <h3 style="margin-top: 30px;">📂 Files in this category</h3>
+                <div class="file-grid" id="fileGrid">
+                    <!-- Files will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentCase = 'Case-001';
+        let currentCategory = 'Documents';
+
+        function selectCase(caseId) {
+            currentCase = caseId;
+            document.getElementById('caseTitle').textContent = caseId;
+            document.getElementById('uploadPath').textContent = `${caseId}/${currentCategory}`;
+
+            // Update active case in sidebar
+            document.querySelectorAll('.case-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.textContent === caseId) {
+                    item.classList.add('active');
+                }
+            });
+
+            loadCaseContents();
+        }
+
+        function selectCategory(category) {
+            currentCategory = category;
+            document.getElementById('uploadPath').textContent = `${currentCase}/${currentCategory}`;
+
+            // Update active folder
+            document.querySelectorAll('.folder').forEach(folder => {
+                folder.classList.remove('active');
+                if (folder.textContent.includes(category.replace('-', ' '))) {
+                    folder.classList.add('active');
+                }
+            });
+
+            loadCaseContents();
+        }
+
+        async function createNewCase() {
+            const caseId = prompt('Enter new case ID (e.g., Case-002):');
+            if (!caseId) return;
+
+            const response = await fetch('/api/create-case', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({case_id: caseId})
+            });
+
+            if (response.ok) {
+                alert(`Case ${caseId} created successfully!`);
+                loadCases();
+                selectCase(caseId);
+            }
+        }
+
+        async function loadCases() {
+            const response = await fetch('/api/cases');
+            const cases = await response.json();
+
+            const caseList = document.getElementById('caseList');
+            caseList.innerHTML = cases.map(caseId =>
+                `<li class="case-item" onclick="selectCase('${caseId}')">${caseId}</li>`
+            ).join('');
+        }
+
+        async function loadCaseContents() {
+            const response = await fetch(`/api/case/${currentCase}`);
+            const files = await response.json();
+
+            // Filter files by current category
+            const categoryFiles = files.filter(f => f.category === currentCategory);
+
+            const fileGrid = document.getElementById('fileGrid');
+            fileGrid.innerHTML = categoryFiles.map(file => `
+                <div class="file-card">
+                    <div style="font-size: 2em;">📄</div>
+                    <div style="font-weight: bold;">${file.name}</div>
+                    <div style="font-size: 0.9em; color: #666;">
+                        ${(file.size / 1024).toFixed(1)} KB
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function searchCase() {
+            const query = document.getElementById('searchBox').value;
+            if (!query) return;
+
+            const resultsDiv = document.getElementById('searchResults');
+            resultsDiv.style.display = 'block';
+            resultsDiv.textContent = 'Searching...';
+
+            const response = await fetch('/api/search', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    case_id: currentCase,
+                    query: query
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.error) {
+                resultsDiv.textContent = `Error: ${result.error}`;
+            } else {
+                resultsDiv.innerHTML = `
+                    <strong>AI Analysis:</strong><br>
+                    ${result.answer}<br><br>
+                    <small>Searched ${result.files_searched} files in ${result.case}</small>
+                `;
+            }
+        }
+
+        // File upload handling
+        document.getElementById('fileInput').addEventListener('change', async (e) => {
+            const files = e.target.files;
+            if (!files.length) return;
+
+            const formData = new FormData();
+            formData.append('case_id', currentCase);
+            formData.append('category', currentCategory);
+
+            for (let file of files) {
+                formData.append('files', file);
+            }
+
+            const response = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                alert(`Uploaded ${files.length} files to ${currentCase}/${currentCategory}`);
+                loadCaseContents();
+            }
+        });
+
+        // Load initial data
+        loadCases();
+        loadCaseContents();
+    </script>
+</body>
+</html>
