@@ -1,0 +1,35 @@
+{
+  "region": "us-east-1",
+  "services": {
+    "bedrock": {
+      "models": [
+        "anthropic.claude-3-5-sonnet-20240620-v1:0",
+        "amazon.titan-text-embedding-v2"
+      ],
+      "embedding_dimensions": 512
+    },
+    "s3": {
+      "bucket_prefix": "jim-ai-forensic-data",
+      "prefixes": {
+        "raw": "raw/",
+        "knowledge_base": "kb/",
+        "processed": "processed/"
+      },
+      "transfer_settings": {
+        "max_concurrent_requests": 40,
+        "multipart_threshold": "64MB",
+        "multipart_chunksize": "64MB"
+      }
+    },
+    "opensearch": {
+      "collection_name": "jim-ai-forensic-kb",
+      "index_name": "jim-ai-documents",
+      "vector_dimensions": 512
+    },
+    "lambda": {
+      "runtime": "python3.11",
+      "memory": 1024,
+      "timeout": 30
+    }
+  }
+}
