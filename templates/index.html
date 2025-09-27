@@ -244,6 +244,152 @@
             margin-bottom: 0.5rem;
             color: #334155;
         }
+
+        .upload-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .upload-area {
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            transition: border-color 0.2s, background-color 0.2s;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: #2563eb;
+            background-color: #f8fafc;
+        }
+
+        .upload-area.dragover {
+            border-color: #2563eb;
+            background-color: #dbeafe;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            transition: background-color 0.2s;
+        }
+
+        .upload-button:hover {
+            background: #1d4ed8;
+        }
+
+        .upload-button:disabled {
+            background: #94a3b8;
+            cursor: not-allowed;
+        }
+
+        .file-list {
+            margin-top: 1rem;
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            background: #f1f5f9;
+            border-radius: 4px;
+            margin-bottom: 0.25rem;
+        }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 500;
+            color: #334155;
+        }
+
+        .file-size {
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        .remove-file {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #e2e8f0;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #2563eb;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .ingestion-status {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .status-in-progress {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #fcd34d;
+        }
+
+        .status-completed {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #34d399;
+        }
+
+        .status-failed {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #f87171;
+        }
+
+        .toggle-upload {
+            background: #059669;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .toggle-upload:hover {
+            background: #047857;
+        }
     </style>
 </head>
 <body>
@@ -257,6 +403,46 @@
     </div>
 
     <div class="chat-container">
+        <button class="toggle-upload" onclick="toggleUpload()">📁 Upload Case Files</button>
+
+        <div class="upload-section" id="uploadSection" style="display: none;">
+            <h3>📂 Upload Forensic Documents</h3>
+            <p>Drag and drop files or click to select. Supports: PDF, DOCX, TXT, CSV, JSON, SQLite, ZIP (max 100MB per file)</p>
+            <div style="background: #fef3c7; padding: 0.75rem; border-radius: 6px; margin-bottom: 1rem; border: 1px solid #fcd34d;">
+                <strong>📱 Large Cell Phone Data (>100MB):</strong><br>
+                For extractions >100MB, use: <code>python3 large-data-processor.py /path/to/data</code>
+            </div>
+
+            <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                <input type="file" id="fileInput" class="file-input" multiple webkitdirectory directory
+                       accept=".pdf,.docx,.txt,.csv,.json,.html,.xml,.db,.sqlite,.zip,.tar,.gz">
+                <input type="file" id="fileInputSingle" class="file-input" multiple
+                       accept=".pdf,.docx,.txt,.csv,.json,.html,.xml,.db,.sqlite,.zip,.tar,.gz">
+                <div>
+                    <p>📎 Click here or drag files/folders to upload</p>
+                    <div style="margin-top: 1rem;">
+                        <button type="button" onclick="selectFiles()" style="background: #2563eb; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; margin-right: 0.5rem;">📄 Select Files</button>
+                        <button type="button" onclick="selectFolder()" style="background: #dc2626; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px;">📁 Select Folder</button>
+                    </div>
+                    <p style="font-size: 0.9rem; color: #64748b; margin-top: 0.5rem;">
+                        Files will be automatically processed and added to the Knowledge Base
+                    </p>
+                </div>
+            </div>
+
+            <div class="file-list" id="fileList"></div>
+
+            <button class="upload-button" id="uploadButton" onclick="uploadFiles()" disabled>
+                Upload Files
+            </button>
+
+            <div class="progress-bar" id="progressBar" style="display: none;">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <div class="ingestion-status" id="ingestionStatus" style="display: none;"></div>
+        </div>
+
         <div class="suggestions">
             <div class="suggestion-chip" onclick="sendSuggestion('What case information do you have?')">
                 📋 Case Overview
@@ -295,6 +481,8 @@
 
     <script>
         let isTyping = false;
+        let selectedFiles = [];
+        let uploadSectionVisible = false;
 
         function handleKeyPress(event) {
             if (event.key === 'Enter' && !isTyping) {
@@ -420,8 +608,278 @@
             }
         }
 
+        // File Upload Functions
+        function toggleUpload() {
+            uploadSectionVisible = !uploadSectionVisible;
+            const section = document.getElementById('uploadSection');
+            const button = document.querySelector('.toggle-upload');
+
+            if (uploadSectionVisible) {
+                section.style.display = 'block';
+                button.textContent = '📁 Hide Upload';
+            } else {
+                section.style.display = 'none';
+                button.textContent = '📁 Upload Case Files';
+            }
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function updateFileList() {
+            const fileList = document.getElementById('fileList');
+            const uploadButton = document.getElementById('uploadButton');
+
+            if (selectedFiles.length === 0) {
+                fileList.innerHTML = '';
+                uploadButton.disabled = true;
+                return;
+            }
+
+            fileList.innerHTML = selectedFiles.map((file, index) => `
+                <div class="file-item">
+                    <div class="file-info">
+                        <div class="file-name">${file.name}</div>
+                        <div class="file-size">${formatFileSize(file.size)}</div>
+                    </div>
+                    <button class="remove-file" onclick="removeFile(${index})">Remove</button>
+                </div>
+            `).join('');
+
+            uploadButton.disabled = false;
+        }
+
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+            updateFileList();
+        }
+
+        function addFiles(files) {
+            const maxSize = 100 * 1024 * 1024; // 100MB
+            const allowedTypes = ['txt', 'pdf', 'docx', 'csv', 'json', 'html', 'xml', 'db', 'sqlite', 'zip', 'tar', 'gz'];
+
+            for (let file of files) {
+                // Check file size
+                if (file.size > maxSize) {
+                    alert(`File "${file.name}" is too large (${formatFileSize(file.size)}). Maximum size is 100MB. Use large-data-processor.py for larger files.`);
+                    continue;
+                }
+
+                // Check file type
+                const extension = file.name.split('.').pop().toLowerCase();
+                if (!allowedTypes.includes(extension)) {
+                    alert(`File type "${extension}" is not supported for "${file.name}".`);
+                    continue;
+                }
+
+                // Check if file already selected
+                if (selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
+                    alert(`File "${file.name}" is already selected.`);
+                    continue;
+                }
+
+                selectedFiles.push(file);
+            }
+
+            updateFileList();
+        }
+
+        async function uploadFiles() {
+            if (selectedFiles.length === 0) return;
+
+            const uploadButton = document.getElementById('uploadButton');
+            const progressBar = document.getElementById('progressBar');
+            const progressFill = document.getElementById('progressFill');
+            const statusDiv = document.getElementById('ingestionStatus');
+
+            uploadButton.disabled = true;
+            uploadButton.textContent = 'Uploading...';
+            progressBar.style.display = 'block';
+            statusDiv.style.display = 'none';
+
+            try {
+                const formData = new FormData();
+                selectedFiles.forEach(file => {
+                    formData.append('files', file);
+                });
+
+                // Simulate progress
+                let progress = 0;
+                const progressInterval = setInterval(() => {
+                    progress += 10;
+                    progressFill.style.width = progress + '%';
+                    if (progress >= 90) {
+                        clearInterval(progressInterval);
+                    }
+                }, 200);
+
+                const response = await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                clearInterval(progressInterval);
+                progressFill.style.width = '100%';
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    statusDiv.innerHTML = `
+                        <div class="status-in-progress">
+                            ✅ ${result.message}<br>
+                            <strong>Ingestion Job ID:</strong> ${result.ingestion_job_id}<br>
+                            <em>Processing will take 5-15 minutes. Check status below.</em>
+                        </div>
+                    `;
+
+                    selectedFiles = [];
+                    updateFileList();
+
+                    // Start checking ingestion status
+                    checkIngestionStatus();
+                } else {
+                    statusDiv.innerHTML = `
+                        <div class="status-failed">
+                            ❌ Upload failed: ${result.error}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `
+                    <div class="status-failed">
+                        ❌ Upload failed: ${error.message}
+                    </div>
+                `;
+            }
+
+            statusDiv.style.display = 'block';
+            uploadButton.disabled = false;
+            uploadButton.textContent = 'Upload Files';
+
+            setTimeout(() => {
+                progressBar.style.display = 'none';
+                progressFill.style.width = '0%';
+            }, 2000);
+        }
+
+        async function checkIngestionStatus() {
+            try {
+                const response = await fetch('/api/ingestion-status');
+                const status = await response.json();
+                const statusDiv = document.getElementById('ingestionStatus');
+
+                if (status.status === 'NO_JOBS') {
+                    return;
+                }
+
+                let statusClass = 'status-in-progress';
+                let statusIcon = '⏳';
+                let statusText = status.status;
+
+                if (status.status === 'COMPLETE') {
+                    statusClass = 'status-completed';
+                    statusIcon = '✅';
+                    statusText = 'Documents successfully processed and available for search!';
+                } else if (status.status === 'FAILED') {
+                    statusClass = 'status-failed';
+                    statusIcon = '❌';
+                    statusText = 'Document processing failed. Please try uploading again.';
+                }
+
+                statusDiv.innerHTML = `
+                    <div class="${statusClass}">
+                        ${statusIcon} <strong>Status:</strong> ${statusText}<br>
+                        <strong>Job ID:</strong> ${status.job_id}<br>
+                        <strong>Started:</strong> ${new Date(status.started_at).toLocaleString()}
+                    </div>
+                `;
+
+                // Continue checking if still in progress
+                if (status.status === 'IN_PROGRESS' || status.status === 'STARTING') {
+                    setTimeout(checkIngestionStatus, 10000); // Check every 10 seconds
+                }
+            } catch (error) {
+                console.error('Error checking ingestion status:', error);
+            }
+        }
+
+        // File/Folder selection functions
+        function selectFiles() {
+            document.getElementById('fileInputSingle').click();
+        }
+
+        function selectFolder() {
+            document.getElementById('fileInput').click();
+        }
+
+        // Drag and drop functionality
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileInputSingle = document.getElementById('fileInputSingle');
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+
+            // Handle both files and folders from drag & drop
+            const items = Array.from(e.dataTransfer.items);
+            const files = [];
+
+            for (let item of items) {
+                if (item.kind === 'file') {
+                    files.push(item.getAsFile());
+                }
+            }
+
+            if (files.length > 0) {
+                addFiles(files);
+            }
+        });
+
+        // Handle folder selection
+        fileInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            if (files.length > 0) {
+                // Show warning for large number of files
+                if (files.length > 100) {
+                    const proceed = confirm(`Selected folder contains ${files.length} files. This may take a while to process. Continue?`);
+                    if (!proceed) {
+                        e.target.value = '';
+                        return;
+                    }
+                }
+                addFiles(files);
+            }
+            e.target.value = ''; // Reset input
+        });
+
+        // Handle individual file selection
+        fileInputSingle.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            addFiles(files);
+            e.target.value = ''; // Reset input
+        });
+
         // Initialize
         loadHistory();
+
+        // Check ingestion status on load
+        setTimeout(checkIngestionStatus, 1000);
     </script>
 </body>
 </html>

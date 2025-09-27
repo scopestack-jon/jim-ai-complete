@@ -11,6 +11,23 @@ python3 app.py
 **Open**: http://localhost:8080
 
 ### Upload Your Forensic Data
+
+#### Option 1: Web Interface (≤100MB files)
+- Open http://localhost:8080
+- Click "📁 Upload Case Files"
+- Drag & drop or select files
+- Automatic processing and ingestion
+
+#### Option 2: Large Cell Phone Data (150GB+)
+```bash
+# For large cell phone extractions
+python3 large-data-processor.py /path/to/your/cell-phone-extraction
+
+# Example:
+python3 large-data-processor.py /Volumes/Evidence/iPhone_Case123
+```
+
+#### Option 3: Command Line (Legacy)
 ```bash
 # For cell phone/SQLite data
 python3 preprocess-files.py /path/to/your/forensic-files
@@ -42,10 +59,16 @@ aws bedrock-agent list-ingestion-jobs \
 
 ## 🔧 File Processing Tips
 
-- **Keep files ≤50MB** each
-- **Supported formats**: PDF, DOCX, TXT, CSV, JSON, HTML
-- **SQLite exports**: Convert to CSV/JSON first
-- **Large files**: Use the preprocessing script to split automatically
+### Web Interface:
+- **File size limit**: 100MB per file, 500MB total per upload
+- **Supported formats**: PDF, DOCX, TXT, CSV, JSON, HTML, SQLite, ZIP
+- **Automatic processing**: Files split to ≤50MB chunks for Knowledge Base
+
+### Large Data Processor:
+- **No size limits**: Handles 150GB+ cell phone extractions
+- **SQLite conversion**: Automatically converts .db files to searchable CSV
+- **Archive extraction**: Handles ZIP, TAR files automatically
+- **Parallel processing**: 5 concurrent uploads for optimal speed
 
 ## ✅ What's Working
 
